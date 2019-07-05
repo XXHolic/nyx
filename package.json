@@ -1,5 +1,5 @@
 {
-  "name": "nyx",
+  "name": "@thynpm/nyx",
   "version": "1.0.0",
   "description": "command line demo",
   "scripts": {
