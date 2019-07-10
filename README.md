@@ -4,7 +4,7 @@ find json file and merge into `data.json` file.
 npm i @thynpm/nyx -g
 ```
 ## Use
-Find a direction and run nyx in command client
+Find a directory and run `nyx` in command client
 ```shell
 nyx
 ```
