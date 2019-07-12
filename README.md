@@ -9,3 +9,5 @@ Find a directory and run `nyx` in command client
 nyx
 ```
 
+Note: exclude `node_modules` directory and file start with `.`
+
