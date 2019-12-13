@@ -69,8 +69,8 @@ function dealFile(filePath) {
   let newStr='';
   // 判断是否有目录并处理
   const indexIndex = str.indexOf('name="index"');
+  splitArr = str.split('##');
   if (indexIndex > -1) {
-    splitArr = str.split('##');
     splitArr.splice(1,1);
 
   }
