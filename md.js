@@ -1,10 +1,22 @@
 #! /usr/bin/env node
 var fs = require("fs");
 var path = require("path");
-// const fsPromises = require('fs').promises;
-var currentPath = process.cwd(); // 获取当前执行路径
 
-var fileArr = []; // 存储目标文件路径
+function delDir(path){
+  let files = [];
+  if(fs.existsSync(path)){
+      files = fs.readdirSync(path);
+      files.forEach((file, index) => {
+          let curPath = path + "/" + file;
+          if(fs.statSync(curPath).isDirectory()){
+              delDir(curPath); //递归删除文件夹
+          } else {
+              fs.unlinkSync(curPath); //删除文件
+          }
+      });
+      fs.rmdirSync(path);
+  }
+}
 
 /**
  * 递归目录及下面的文件，找出目标文件
@@ -27,23 +39,32 @@ function readDir(dir) {
     if (info.isDirectory() && !excludeDir.test(file)) {
       readDir(pathName);
     } else {
-      if (path.extname(file) === ".md") {
+      let fileName = path.basename(file);
+      let fileNameArr = fileName.split('.');
+      let fileNameArrFirst = fileNameArr[0];
+      if (/^[0-9]*$/.test(fileNameArrFirst) && path.extname(file) === ".md") {
         fileArr.push(pathName);
       }
     }
   }
 }
 
+function traverseFile(file) {
+  // 同步创建目录，没有回调
+  fs.mkdirSync('./jj', { recursive: true }, (err) => {});
+  fs.mkdirSync('./sf', { recursive: true }, (err) => {});
 
-// readDir(currentPath);
+  file.length &&
+  file.forEach(ele => {
+    dealFile(ele);
+  });
+}
 
-
-
-function dealFile() {
+function dealFile(filePath) {
   const urlPrefix = 'https://xxholic.github.io/segment';
   const addText = '\r\n- [Origin][url-origin]\r\n- [My GitHub][url-my-github]\r\n\r\n';
   const addUrl = '\r\n\r\n[url-origin]:https://github.com/XXHolic/segment/issues/1\r\n[url-my-github]:https://github.com/XXHolic';
-  const str = fs.readFileSync('./test.md',{encoding:'utf-8'});
+  const str = fs.readFileSync(filePath,{encoding:'utf-8'});
   let splitArr = [];
   let newStr='';
   // 判断是否有目录并处理
@@ -90,11 +111,14 @@ function dealFile() {
     secondStr = secondStr.slice(0, detailsIndex);
   }
 
-    // 最末尾加上 URL
-    secondStr = secondStr + addUrl;
+  // 最末尾加上 URL
+  secondStr = secondStr + addUrl;
 
-  return {jj:newStr, sf:secondStr};
+  var fileName = path.basename(filePath);
+  console.info('fileName',fileName);
 
+  fs.writeFile(`./jj/${fileName}`, newStr, dealError);
+  fs.writeFile(`./sf/${fileName}`, secondStr, dealError);
 }
 
 function dealError(err) {
@@ -105,21 +129,11 @@ function dealError(err) {
   }
 }
 
-// 同步创建目录，没有回调
-fs.mkdirSync('./jj', { recursive: true }, (err) => {});
-fs.mkdirSync('./sf', { recursive: true }, (err) => {});
-const result = dealFile();
-fs.writeFile("./jj/test.md", result.jj, dealError);
-fs.writeFile("./sf/test.md", result.sf, dealError);
 
-// 异步创建目录，返回 promise
-// fsPromises.mkdir('./test').then(()=>{
-//   fs.writeFile("./test/test.md", newData, function(err) {
-//     if (err) {
-//       console.error("文件写入失败");
-//     } else {
-//       console.info("文件写入成功");
-//     }
-//   });
-// })
+var currentPath = process.cwd(); // 获取当前执行路径
+var fileArr = []; // 存储目标文件路径
 
+delDir('./jj');
+delDir('./sf');
+readDir(currentPath);
+traverseFile(fileArr);
