@@ -34,62 +34,83 @@ function readDir(dir) {
   }
 }
 
-/**
- * 合并文件内容
- * @param {Array} arr 包含了所有 JSON 文件的路径
- * @returns {String} 返回合并后 JSON 字符串
- */
-function combineFile(arr) {
-  var obj = {};
-  arr.length &&
-    arr.forEach(ele => {
-      var str = deleDom(ele);
-      var contentObj = JSON.parse(str);
-      Object.assign(obj, contentObj);
-    });
-  return JSON.stringify(obj);
-}
-
-/**
- * 删除 dom 符号，防止异常
- * @param {String} filePath 文件路径
- */
-function deleDom(filePath) {
-  var bin = fs.readFileSync(filePath);
-  if (bin[0] === 0xef && bin[1] === 0xbb && bin[2] === 0xbf) {
-    bin = bin.slice(3);
-  }
-
-  return bin.toString("utf-8");
-}
 
 // readDir(currentPath);
 
-// var jsonStr = combineFile(fileArr);
 
-// fs.writeFile("./data.json", jsonStr, function(err) {
-//   if (err) {
-//     console.error("文件写入失败");
-//   } else {
-//     console.info("文件写入成功，路径为：", currentPath);
-//   }
-// });
 
-const data = fs.readFileSync('./test.md',{encoding:'utf-8'});
-// console.log('data',data);
-// let newData = data+'\r\n'+'加入末尾';
-let urlPrefix = 'https://xxholic.github.io/segment';
-let newData = data.replace(/\.\./g,urlPrefix);
+function dealFile() {
+  const urlPrefix = 'https://xxholic.github.io/segment';
+  const addText = '\r\n- [Origin][url-origin]\r\n- [My GitHub][url-my-github]\r\n\r\n';
+  const addUrl = '\r\n\r\n[url-origin]:https://github.com/XXHolic/segment/issues/1\r\n[url-my-github]:https://github.com/XXHolic';
+  const str = fs.readFileSync('./test.md',{encoding:'utf-8'});
+  let splitArr = [];
+  let newStr='';
+  // 判断是否有目录并处理
+  const indexIndex = str.indexOf('name="index"');
+  if (indexIndex > -1) {
+    splitArr = str.split('##');
+    splitArr.splice(1,1);
 
-// 同步创建目录，没有回调
-fs.mkdirSync('./test', { recursive: true }, (err) => {});
-fs.writeFile("./test/test.md", newData, function(err) {
+  }
+
+  // 插入 origin GitHub 显示文字
+  splitArr[1] = splitArr[1] + addText
+
+  // 替换 .. 为实际地址
+  newStr = splitArr.join('##');
+  newStr = newStr.replace(/\.\./g,urlPrefix);
+
+  // 最末尾加上 URL
+  newStr = newStr + addUrl;
+
+  let secondStr = newStr;
+  let secondStrArr = secondStr.split('##');
+  let secondStrArrLen = secondStrArr.length;
+  // 清除 title 上的 html 标签
+  for (let index = 0; index < secondStrArrLen; index++) {
+    let element = secondStrArr[index];
+    const aEndIndex = element.indexOf('</a>');
+    if (aEndIndex > -1) {
+      const aStartIndex = element.indexOf('<a');
+      let startPartStr = '';
+      if (aStartIndex > -1) {
+        startPartStr = element.slice(0, aStartIndex);
+      }
+      secondStrArr[index] = startPartStr + element.slice(aEndIndex+5)
+    }
+  }
+
+  secondStr = secondStrArr.join('##');
+
+  // 去除 details
+  const luggageIndex = secondStr.indexOf(':wastebasket:');
+  if (luggageIndex > -1) {
+    const detailsIndex = secondStr.lastIndexOf('<details>');
+    secondStr = secondStr.slice(0, detailsIndex);
+  }
+
+    // 最末尾加上 URL
+    secondStr = secondStr + addUrl;
+
+  return {jj:newStr, sf:secondStr};
+
+}
+
+function dealError(err) {
   if (err) {
     console.error("文件写入失败");
   } else {
     console.info("文件写入成功");
   }
-});
+}
+
+// 同步创建目录，没有回调
+fs.mkdirSync('./jj', { recursive: true }, (err) => {});
+fs.mkdirSync('./sf', { recursive: true }, (err) => {});
+const result = dealFile();
+fs.writeFile("./jj/test.md", result.jj, dealError);
+fs.writeFile("./sf/test.md", result.sf, dealError);
 
 // 异步创建目录，返回 promise
 // fsPromises.mkdir('./test').then(()=>{
