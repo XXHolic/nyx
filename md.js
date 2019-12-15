@@ -61,9 +61,13 @@ function traverseFile(file) {
 }
 
 function dealFile(filePath) {
+  var fileName = path.basename(filePath);
+  const fileNameArr = fileName.split('.');
+  const articleLink = fileNameArr[2];
+
   const urlPrefix = 'https://xxholic.github.io/segment';
   const addText = '\r\n- [Origin][url-origin]\r\n- [My GitHub][url-my-github]\r\n\r\n';
-  const addUrl = '\r\n\r\n[url-origin]:https://github.com/XXHolic/segment/issues/1\r\n[url-my-github]:https://github.com/XXHolic';
+  const addUrl = `\r\n\r\n[url-origin]:https://github.com/XXHolic/segment/issues/${articleLink}\r\n[url-my-github]:https://github.com/XXHolic`;
   const str = fs.readFileSync(filePath,{encoding:'utf-8'});
   let splitArr = [];
   let newStr='';
@@ -114,8 +118,7 @@ function dealFile(filePath) {
   // 最末尾加上 URL
   secondStr = secondStr + addUrl;
 
-  var fileName = path.basename(filePath);
-  console.info('fileName',fileName);
+
 
   fs.writeFile(`./jj/${fileName}`, newStr, dealError);
   fs.writeFile(`./sf/${fileName}`, secondStr, dealError);
