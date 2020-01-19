@@ -4,7 +4,7 @@
   "description": "command line demo",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "tr": " node del.js && node cli.js"
+    "tr": " node del.js && node tr.js"
   },
   "repository": {
     "type": "git",
