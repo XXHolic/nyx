@@ -91,7 +91,8 @@ function dealFile(filePath) {
     const detailsIndex = bkyStr.lastIndexOf('<details>');
     bkyStr = bkyStr.slice(0, detailsIndex);
 
-
+  // 最末尾加上 URL
+  bkyStr = bkyStr + addUrl;
   }
 
   //不是末尾的 <details> ，文中用到的要转换一下
@@ -102,8 +103,7 @@ function dealFile(filePath) {
     bkyStr = bkyStr.replace(/<\/summary>/g,'');
   }
 
-  // 最末尾加上 URL
-  bkyStr = bkyStr + addUrl;
+
 
 
 
@@ -156,6 +156,8 @@ function dealFile(filePath) {
   if (wastebasketIndex > -1) {
     const detailsIndex = secondStr.lastIndexOf('<details>');
     secondStr = secondStr.slice(0, detailsIndex);
+      // 最末尾加上 URL
+  secondStr = secondStr + addUrl;
   }
   //不是末尾的 <details> ，文中用到的要转换一下
   if (secondStr.lastIndexOf('<details>') > -1){
@@ -164,8 +166,7 @@ function dealFile(filePath) {
     secondStr = secondStr.replace(/<summary>/g,'');
     secondStr = secondStr.replace(/<\/summary>/g,'');
   }
-  // 最末尾加上 URL
-  secondStr = secondStr + addUrl;
+
 
   fs.writeFile(`${bkyFilePath}/${fileName}`, bkyStr, dealError);
   fs.writeFile(`${jjFilePath}/${fileName}`, jjStr, dealError);
